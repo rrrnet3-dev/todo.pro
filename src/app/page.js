@@ -7,6 +7,14 @@ export default function TodoApp() {
   const [todos, setTodos] = useState([]);
   const [input, setInput] = useState('');
   const [isMounted, setIsMounted] = useState(false);
+const [filter, setFilter] = useState('all') // 'all' | 'active' | 'completed'
+
+// Filter the todos based on current filter
+const filteredTodos = todos.filter(todo => {
+  if (filter === 'active') return !todo.completed
+  if (filter === 'completed') return todo.completed
+  return true // 'all'
+})
 
   useEffect(() => { setIsMounted(true) }, []);
 
@@ -69,14 +77,29 @@ export default function TodoApp() {
             <FiPlus /> Add
           </motion.button>
         </form>
-
+{/* Filter Buttons */}
+<div className="flex gap-2 mb-4 justify-center">
+  {['all', 'active', 'completed'].map(f => (
+    <button
+      key={f}
+      onClick={() => setFilter(f)}
+      className={`px-3 py-1 rounded-lg capitalize transition ${
+        filter === f 
+          ? 'bg-blue-500 text-white' 
+          : 'bg-neutral-700 text-neutral-300 hover:bg-neutral-600'
+      }`}
+    >
+      {f}
+    </button>
+  ))}
+</div>
         <div className="mb-4 text-sm text-neutral-400">
-          {todos.length} items • {completedCount} completed
+          {filteredTodos.length} items • {completedCount} completed
         </div>
 
         <div className="space-y-2">
           <AnimatePresence>
-            {todos.map(todo => (
+            {filteredTodos.map(todo => (
               <motion.div
                 key={todo.id}
                 initial={{ opacity: 0, y: -10 }}
