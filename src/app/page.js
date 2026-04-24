@@ -7,7 +7,9 @@ export default function TodoApp() {
   const [todos, setTodos] = useState([]);
   const [input, setInput] = useState('');
   const [isMounted, setIsMounted] = useState(false);
-const [filter, setFilter] = useState('all') // 'all' | 'active' | 'completed'
+  const [filter, setFilter] = useState('all') // 'all' | 'active' | 'completed'
+  const [editingId, setEditingId] = useState(null)
+  const [editText, setEditText] = useState('')
 
 // Filter the todos based on current filter
 const filteredTodos = todos.filter(todo => {
@@ -51,6 +53,29 @@ const filteredTodos = todos.filter(todo => {
   const deleteTodo = (id) => {
     setTodos(todos.filter(todo => todo.id!== id));
   };
+const startEdit = (todo) => {
+  setEditingId(todo.id)
+  setEditText(todo.text)
+}
+
+const saveEdit = () => {
+  if (editText.trim()) {
+    setTodos(todos.map(todo => 
+      todo.id === editingId ? { ...todo, text: editText } : todo
+    ))
+  }
+  setEditingId(null)
+  setEditText('')
+}
+
+const cancelEdit = () => {
+  setEditingId(null)
+  setEditText('')
+}
+
+const clearCompleted = () => {
+  setTodos(todos.filter(todo => !todo.completed))
+}
 
   const completedCount = todos.filter(t => t.completed).length;
 
@@ -59,8 +84,8 @@ const filteredTodos = todos.filter(todo => {
   return (
     <main className="min-h-screen bg-neutral-900 text-white p-4 sm:p-8">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-4xl font-bold mb-2">Todo Pro v0.1</h1>
-        <p className="text-neutral-400 mb-8">Day 13 of 100 Days of Code</p>
+        <h1 className="text-3xl font-bold mb-2">Todo Pro v0.2</h1>
+        <p className="text-neutral-400 mb-6">Day 14 of 100 Days of Code</p>
 
         <form onSubmit={addTodo} className="flex gap-2 mb-6">
           <input
@@ -88,10 +113,18 @@ const filteredTodos = todos.filter(todo => {
           ? 'bg-blue-500 text-white' 
           : 'bg-neutral-700 text-neutral-300 hover:bg-neutral-600'
       }`}
-    >
+>
       {f}
     </button>
   ))}
+  {completedCount > 0 && (
+  <button
+    onClick={clearCompleted}
+    className="px-3 py-1 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition"
+  >
+    Clear completed
+  </button>
+)}
 </div>
         <div className="mb-4 text-sm text-neutral-400">
           {filteredTodos.length} items • {completedCount} completed
@@ -113,9 +146,27 @@ const filteredTodos = todos.filter(todo => {
                   onChange={() => toggleTodo(todo.id)}
                   className="w-5 h-5 accent-teal-500 cursor-pointer"
                 />
-                <span className={`flex-1 ${todo.completed? 'line-through text-neutral-500' : ''}`}>
-                  {todo.text}
-                </span>
+{editingId === todo.id ? (
+  <input
+    autoFocus
+    value={editText}
+    onChange={(e) => setEditText(e.target.value)}
+    onBlur={saveEdit}
+    onKeyDown={(e) => {
+      if (e.key === 'Enter') saveEdit()
+      if (e.key === 'Escape') cancelEdit()
+    }}
+    className="flex-1 bg-neutral-700 text-white px-2 py-1 rounded outline-none"
+  />
+) : (
+  <span 
+    onDoubleClick={() => startEdit(todo)}
+    className={`flex-1 cursor-pointer ${todo.completed ? 'line-through text-neutral-500' : ''}`}
+  >
+    {todo.text}
+  </span>
+)}
+
                 <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={() => deleteTodo(todo.id)}
@@ -128,7 +179,7 @@ const filteredTodos = todos.filter(todo => {
           </AnimatePresence>
         </div>
 
-        {todos.length === 0 && (
+        {filteredTodos.length === 0 && (
           <p className="text-center text-neutral-500 mt-12">No tasks yet. Add one above!</p>
         )}
       </div>
