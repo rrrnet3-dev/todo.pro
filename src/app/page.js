@@ -7,7 +7,7 @@ export default function Home() {
   const [todos, setTodos] = useState([])
   const [input, setInput] = useState('')
   const [dueDate, setDueDate] = useState('')
-  const [filter, setFilter] = useState('all') // 'all', 'active', 'completed', 'today', 'overdue'
+  const [filter, setFilter] = useState('all') // 'all', 'active', 'completed', 'today', 'tomorrow', 'overdue'
   const [search, setSearch] = useState('')
   const [editingId, setEditingId] = useState(null)
   const [editText, setEditText] = useState('')
@@ -51,8 +51,8 @@ export default function Home() {
   const toggleTodo = (id) => {
     setTodos(todos.map(todo =>
       todo.id === id
-    ? {
-        ...todo,
+   ? {
+       ...todo,
           completed:!todo.completed,
           completedAt:!todo.completed? new Date().toISOString() : null
         }
@@ -107,6 +107,13 @@ export default function Home() {
     return dateStr === today
   }
 
+  // Helper: check if date is tomorrow
+  const isTomorrow = (dateStr) => {
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    return dateStr === tomorrow.toISOString().split('T')[0]
+  }
+
   // Helper: check if overdue
   const isOverdue = (todo) => {
     return todo.dueDate && new Date(todo.dueDate) < new Date().setHours(0,0,0,0) &&!todo.completed
@@ -114,7 +121,7 @@ export default function Home() {
 
   // Filter + Search + Sort logic
   const filteredTodos = todos
-   .filter(todo => {
+  .filter(todo => {
       // Search filter
       if (search &&!todo.text.toLowerCase().includes(search.toLowerCase())) {
         return false
@@ -124,10 +131,11 @@ export default function Home() {
       if (filter === 'active') return!todo.completed
       if (filter === 'completed') return todo.completed
       if (filter === 'today') return todo.dueDate && isToday(todo.dueDate) &&!todo.completed
+      if (filter === 'tomorrow') return todo.dueDate && isTomorrow(todo.dueDate) &&!todo.completed
       if (filter === 'overdue') return isOverdue(todo)
       return true // 'all'
     })
-   .sort((a, b) => {
+  .sort((a, b) => {
       // Completed items go to bottom
       if (a.completed &&!b.completed) return 1
       if (!a.completed && b.completed) return -1
@@ -144,6 +152,7 @@ export default function Home() {
   const activeCount = todos.filter(t =>!t.completed).length
   const completedCount = todos.filter(t => t.completed).length
   const todayCount = todos.filter(t => t.dueDate && isToday(t.dueDate) &&!t.completed).length
+  const tomorrowCount = todos.filter(t => t.dueDate && isTomorrow(t.dueDate) &&!t.completed).length
   const overdueCount = todos.filter(t => isOverdue(t)).length
   const today = new Date().toISOString().split('T')[0]
 
@@ -152,13 +161,14 @@ export default function Home() {
     { key: 'active', label: 'Active', count: activeCount },
     { key: 'completed', label: 'Completed', count: completedCount },
     { key: 'today', label: 'Due Today', count: todayCount },
+    { key: 'tomorrow', label: 'Tomorrow', count: tomorrowCount },
     { key: 'overdue', label: 'Overdue', count: overdueCount }
   ]
 
   return (
     <main className="min-h-screen bg-neutral-950 text-neutral-100 p-4 md:p-8">
       <div className="max-w-md mx-auto">
-        <h1 className="text-3xl font-bold mb-2">Todo Pro v0.4.0</h1>
+        <h1 className="text-3xl font-bold mb-2">Todo Pro v0.4.1</h1>
         <p className="text-neutral-400 mb-6">Day 16 of 100 Days of Code</p>
 
         {/* Add Form */}
@@ -213,7 +223,7 @@ export default function Home() {
               onClick={() => setFilter(f.key)}
               className={`px-3 py-1 rounded-lg transition text-sm ${
                 filter === f.key
-              ? 'bg-emerald-500 text-white'
+             ? 'bg-emerald-500 text-white'
                 : 'bg-neutral-900 text-neutral-400 hover:bg-neutral-800'
               }`}
             >
@@ -240,6 +250,7 @@ export default function Home() {
           {filteredTodos.map(todo => {
             const overdue = isOverdue(todo)
             const dueToday = todo.dueDate && isToday(todo.dueDate) &&!todo.completed
+            const dueTomorrow = todo.dueDate && isTomorrow(todo.dueDate) &&!todo.completed
 
             return (
               <motion.div
@@ -249,7 +260,7 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, x: -100 }}
                 className={`flex items-center gap-3 p-3 mb-2 bg-neutral-900 border rounded-lg ${
-                  overdue? 'border-red-500/50' : dueToday? 'border-yellow-500/50' : 'border-neutral-800'
+                  overdue? 'border-red-500/50' : dueToday? 'border-yellow-500/50' : dueTomorrow? 'border-blue-500/50' : 'border-neutral-800'
                 }`}
               >
                 <input
@@ -301,7 +312,7 @@ export default function Home() {
                             <button
                               onClick={() => setEditingDateId(todo.id)}
                               className={`hover:underline ${
-                                todo.completed? 'text-neutral-500' : overdue? 'text-red-400' : dueToday? 'text-yellow-400' : 'text-neutral-400'
+                                todo.completed? 'text-neutral-500' : overdue? 'text-red-400' : dueToday? 'text-yellow-400' : dueTomorrow? 'text-blue-400' : 'text-neutral-400'
                               }`}
                             >
                               Due: {new Date(todo.dueDate).toLocaleDateString('en-GB')}
@@ -323,6 +334,11 @@ export default function Home() {
                         {dueToday &&!overdue && (
                           <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded-full font-bold">
                             TODAY
+                          </span>
+                        )}
+                        {dueTomorrow && (
+                          <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded-full font-bold">
+                            TOMORROW
                           </span>
                         )}
                       </div>
@@ -349,6 +365,7 @@ export default function Home() {
              filter === 'active'? 'No active tasks' :
              filter === 'completed'? 'No completed tasks' :
              filter === 'today'? 'Nothing due today' :
+             filter === 'tomorrow'? 'Nothing planned for tomorrow' :
              filter === 'overdue'? 'No overdue tasks' :
              'No tasks yet. Add one above!'}
           </div>
