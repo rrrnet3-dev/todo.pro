@@ -1,8 +1,8 @@
-# Todo Pro v0.2 ✅
+# Todo Pro v0.2
 
-Production CRUD app built with Next.js 14, Tailwind CSS, and Framer Motion.
+**Day 14 of 100 Days of Code** | [Live Demo](your-vercel-link)
 
-**Live Demo:** https://todo-pro-rrrnet3-devs-projects.vercel.app
+A clean, fast todo app built with Next.js, Tailwind CSS, and Framer Motion.
 
 ### ✨ Features
 - **CRUD Operations** - Add, toggle complete, delete todos
@@ -13,15 +13,21 @@ Production CRUD app built with Next.js 14, Tailwind CSS, and Framer Motion.
 - **Animations** - Smooth slide-in/out with Framer Motion
 - **Responsive** - Works on mobile and desktop
 
-### 🛠️ Tech Stack
-Next.js 14 • React • Tailwind CSS • Framer Motion • Vercel
+## 📋 Changelog
 
-### 📸 Screenshot
-[Add a screenshot later]
+### **v0.2 - Day 14** `2026-04-24`
+- Added filter system: All / Active / Completed
+- Added inline edit mode with auto-focus
+- Added Clear Completed bulk action
+- Added empty state messages
+- Updated to Day 14 branding
 
-### 🚀 Roadmap
-- [x] v0.1: Basic CRUD + localStorage + animations
-- [x] v0.2: Filters, edit mode, clear completed
-- [ ] v1.0: Dark mode, drag-to-reorder
+### **v0.1 - Day 13** `2026-04-23`
+- Initial release with CRUD, localStorage, animations
+- Deployed to Vercel
 
-Built for #100DaysOfCode - Day 14/100
+## 🛠️ Tech Stack
+- Next.js 14 + React
+- Tailwind CSS
+- Framer Motion
+- Deployed on Vercel
